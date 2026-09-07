@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, ChangeEvent } from "react";
 import Link from "next/link";
 import {
   Search,
@@ -22,6 +22,7 @@ import {
   CreditCard,
   Banknote,
   Flame,
+  Upload,
 } from "lucide-react";
 
 type ProductItem = {
@@ -38,8 +39,7 @@ type ProductItem = {
   badgeColor?: string;
 };
 
-// แก้ไขรูปภาพให้ตรงตามรายการสินค้าทุกรายการเรียบร้อยแล้ว
-const PRODUCTS: ProductItem[] = [
+const INITIAL_PRODUCTS: ProductItem[] = [
   {
     id: "1",
     title: "ลูกชิ้นเนื้อแท้ไร้แป้ง (ไม้ละ 10.-)",
@@ -75,7 +75,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "ยอดฮิต",
     category: "ไส้กรอก",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1585325701165-351af916e581?w=500&q=80",
+    image: "https://images.unsplash.com/photo-1541014741259-de529411b96a?w=500&q=80",
     badge: "กรอบฟู",
     badgeColor: "bg-amber-500",
   },
@@ -88,7 +88,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "ใหม่",
     category: "ลูกชิ้นปิ้ง",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&q=80",
+    image: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=500&q=80",
   },
   {
     id: "5",
@@ -112,16 +112,67 @@ const CATEGORIES = [
 ];
 
 export default function HomePage() {
+  const [products, setProducts] = useState<ProductItem[]>(INITIAL_PRODUCTS);
   const [category, setCategory] = useState("ทั้งหมด");
   const [search, setSearch] = useState("");
   const [darkMode, setDarkMode] = useState(false);
   const [showCart, setShowCart] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState("qr");
-
   const [cart, setCart] = useState<Record<string, number>>({});
 
+  // State สำหรับการเปิด/ปิด Modal เพิ่มสินค้า
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+  const [newCategory, setNewCategory] = useState("ลูกชิ้นปิ้ง");
+  const [newImage, setNewImage] = useState<string>("");
+
+  // ฟังก์ชันรองรับการอัปโหลดรูปภาพ
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // ฟังก์ชันบันทึกสินค้าใหม่
+  const handleAddProduct = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle || !newPrice) {
+      alert("กรุณากรอกชื่อสินค้าและราคาให้ครบถ้วน");
+      return;
+    }
+
+    const newItem: ProductItem = {
+      id: Date.now().toString(),
+      title: newTitle,
+      price: Number(newPrice),
+      department: "แผนกอาหาร",
+      timeAgo: "เมื่อสักครู่",
+      tag: "ใหม่",
+      category: newCategory,
+      has3D: false,
+      image: newImage,
+      badge: "สินค้าใหม่",
+      badgeColor: "bg-blue-500",
+    };
+
+    setProducts((prev) => [newItem, ...prev]);
+    setShowAddModal(false);
+
+    // ล้างค่าในฟอร์ม
+    setNewTitle("");
+    setNewPrice("");
+    setNewImage("");
+    setNewCategory("ลูกชิ้นปิ้ง");
+  };
+
   const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product: ProductItem) => {
+    return products.filter((product: ProductItem) => {
       const matchCategory =
         category === "ทั้งหมด" || product.category === category;
 
@@ -131,9 +182,9 @@ export default function HomePage() {
 
       return matchCategory && matchSearch;
     });
-  }, [category, search]);
+  }, [category, search, products]);
 
-  const cartItems = PRODUCTS.filter((product: ProductItem) => cart[product.id]);
+  const cartItems = products.filter((product: ProductItem) => cart[product.id]);
 
   const total = cartItems.reduce(
     (sum: number, product: ProductItem) => sum + product.price * cart[product.id],
@@ -153,15 +204,12 @@ export default function HomePage() {
   const decreaseCart = (id: string) => {
     setCart((prev) => {
       const next = { ...prev };
-
       if (!next[id]) return next;
-
       if (next[id] <= 1) {
         delete next[id];
       } else {
         next[id]--;
       }
-
       return next;
     });
   };
@@ -240,6 +288,16 @@ export default function HomePage() {
                 }`}
               />
             </div>
+
+            {/* ADD PRODUCT BUTTON */}
+            <button
+              type="button"
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-2 px-4 py-3 rounded-full bg-orange-600 text-white font-medium hover:bg-orange-700 transition cursor-pointer shadow-sm text-sm"
+            >
+              <Plus size={18} />
+              เพิ่มสินค้า
+            </button>
 
             {/* FILTER */}
             <button
@@ -573,6 +631,152 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {/* MODAL: เพิ่มสินค้าใหม่ + อัปโหลดรูป */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div
+            className={`w-full max-w-md rounded-2xl p-6 shadow-2xl border ${
+              darkMode
+                ? "bg-[#231D1A] border-[#362C27] text-white"
+                : "bg-white border-[#EFE8D8] text-[#4A3E3D]"
+            }`}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-orange-100 dark:border-[#362C27]">
+              <h3 className="text-lg font-bold">เพิ่มรายการสินค้าใหม่</h3>
+              <button
+                type="button"
+                onClick={() => setShowAddModal(false)}
+                className="p-1 rounded-full hover:bg-orange-500/10 transition cursor-pointer"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddProduct} className="mt-4 space-y-4">
+              {/* UPLOAD IMAGE AREA */}
+              <div>
+                <label className="block text-xs font-semibold mb-2">
+                  รูปภาพสินค้า
+                </label>
+                <div className="relative w-full h-40 border-2 border-dashed rounded-xl flex flex-col items-center justify-center overflow-hidden border-orange-300 dark:border-[#3D332E] bg-orange-50/50 dark:bg-[#1A1614] hover:border-orange-500 transition">
+                  {newImage ? (
+                    <div className="relative w-full h-full">
+                      <img
+                        src={newImage}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setNewImage("")}
+                        className="absolute top-2 right-2 p-1 rounded-full bg-black/60 text-white hover:bg-red-600 transition"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex flex-col items-center justify-center w-full h-full cursor-pointer p-4 text-center">
+                      <Upload size={28} className="text-orange-500 mb-2" />
+                      <span className="text-xs font-medium text-orange-800 dark:text-orange-300">
+                        คลิกเพื่อเลือก/อัปโหลดรูปภาพ
+                      </span>
+                      <span className="text-[10px] text-orange-700/50 dark:text-orange-200/40 mt-1">
+                        รองรับ PNG, JPG, WEBP
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {/* TITLE */}
+              <div>
+                <label className="block text-xs font-semibold mb-1">
+                  ชื่อสินค้า / เมนู
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="เช่น ไส้กรอกไก่ชีสทะลัก"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition ${
+                    darkMode
+                      ? "bg-[#1A1614] border-[#3D332E] focus:border-orange-500"
+                      : "bg-white border-[#E5DDC8] focus:border-orange-600"
+                  }`}
+                />
+              </div>
+
+              {/* PRICE & CATEGORY */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    ราคา (บาท)
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min="0"
+                    placeholder="15"
+                    value={newPrice}
+                    onChange={(e) => setNewPrice(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition ${
+                      darkMode
+                        ? "bg-[#1A1614] border-[#3D332E] focus:border-orange-500"
+                        : "bg-white border-[#E5DDC8] focus:border-orange-600"
+                    }`}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold mb-1">
+                    หมวดหมู่
+                  </label>
+                  <select
+                    value={newCategory}
+                    onChange={(e) => setNewCategory(e.target.value)}
+                    className={`w-full px-3 py-2 rounded-xl border text-sm outline-none transition ${
+                      darkMode
+                        ? "bg-[#1A1614] border-[#3D332E] focus:border-orange-500 text-white"
+                        : "bg-white border-[#E5DDC8] focus:border-orange-600"
+                    }`}
+                  >
+                    {CATEGORIES.filter((c) => c !== "ทั้งหมด").map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* ACTION BUTTONS */}
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-2.5 rounded-xl border border-orange-200 dark:border-[#3D332E] text-xs font-semibold hover:bg-orange-500/10 transition cursor-pointer"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-orange-600 text-white text-xs font-semibold hover:bg-orange-700 transition cursor-pointer shadow-md"
+                >
+                  เพิ่มสินค้า
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }
