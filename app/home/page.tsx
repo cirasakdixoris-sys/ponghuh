@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, Bell, Plus, Flame, Sparkles, ShoppingBag, Check } from 'lucide-react';
-import { useState } from 'react';
+import { Search, Bell, Plus, Flame, Sparkles, ShoppingBag, Check, Sun, Moon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 
 const CATEGORIES = ['ทั้งหมด', 'ลูกชิ้นทอด', 'ลูกชิ้นปิ้ง', 'ไส้กรอก', 'ชุดรวมฮิต', 'เครื่องดื่ม'];
 
@@ -21,7 +22,7 @@ const PRODUCTS = [
     price: 50,
     category: 'ชุดรวมฮิต',
     seller: 'ร้านพี่หมู หน้าตึก 3',
-    image: 'https://images.unsplash.com/photo-1562967914-608f82629710?w=400&q=80',
+    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=400&q=80',
   },
   {
     id: 3,
@@ -29,7 +30,7 @@ const PRODUCTS = [
     price: 20,
     category: 'ไส้กรอก',
     seller: 'ซุ้มข้างลานกิจกรรม',
-    image: 'https://images.unsplash.com/photo-1541696432-82c6da8ce7bf?w=400&q=80',
+    image: 'https://images.unsplash.com/photo-1625938146369-ad8024139380?w=400&q=80',
   },
   {
     id: 4,
@@ -37,7 +38,7 @@ const PRODUCTS = [
     price: 12,
     category: 'ลูกชิ้นปิ้ง',
     seller: 'ร้านพี่หมู หน้าตึก 3',
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80',
+    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80',
   },
   {
     id: 5,
@@ -45,23 +46,25 @@ const PRODUCTS = [
     price: 25,
     category: 'เครื่องดื่ม',
     seller: 'ร้านน้ำป้าจอย',
-    image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=400&q=80',
+    image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80',
   },
 ];
 
 export default function HomePage() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
   const [cart, setCart] = useState<{ id: number; price: number }[]>([]);
   const [addedAnimation, setAddedAnimation] = useState<number | null>(null);
 
-  // กรองสินค้าตามหมวดหมู่ที่เลือก
+  useEffect(() => setMounted(true), []);
+
   const filteredProducts = selectedCategory === 'ทั้งหมด'
     ? PRODUCTS
     : PRODUCTS.filter((item) => item.category === selectedCategory);
 
-  // ฟังก์ชันเพิ่มสินค้าลงตะกร้า
   const addToCart = (e: React.MouseEvent, product: { id: number; price: number }) => {
-    e.preventDefault(); // ป้องกันการเปลี่ยนหน้าไปยังรายละเอียดสินค้าเมื่อกดปุ่มบวก
+    e.preventDefault();
     setCart((prev) => [...prev, product]);
     setAddedAnimation(product.id);
     setTimeout(() => setAddedAnimation(null), 1000);
@@ -70,18 +73,32 @@ export default function HomePage() {
   const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
 
   return (
-    <div className="min-h-screen pb-28 max-w-md mx-auto bg-slate-50 dark:bg-slate-950 relative">
+    <div className="min-h-screen pb-28 max-w-md mx-auto bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 relative">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md p-4 space-y-3 border-b border-slate-200 dark:border-slate-800">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xs text-slate-500 dark:text-slate-400">หิวหรือยัง 👋</h2>
-            <h1 className="text-lg font-bold">ร้านลูกชิ้นวิทยาลัย</h1>
+            <h1 className="text-lg font-bold">ร้านลูกชิ้น ponghuh</h1>
           </div>
-          <button className="p-2 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 relative">
-            <Bell size={20} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-          </button>
+          
+          <div className="flex items-center gap-2">
+            {/* ปุ่มสลับโหมดกลางวัน / กลางคืน */}
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:scale-105 transition-all"
+                aria-label="Toggle Theme"
+              >
+                {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} />}
+              </button>
+            )}
+
+            <button className="p-2 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 relative">
+              <Bell size={18} />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+            </button>
+          </div>
         </div>
 
         {/* Search Bar */}
@@ -152,7 +169,6 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* ปุ่มกดเพิ่มลงตะกร้า */}
                   <button
                     onClick={(e) => addToCart(e, item)}
                     className={`p-2 rounded-xl transition-all active:scale-90 ${
@@ -171,7 +187,7 @@ export default function HomePage() {
         </section>
       </main>
 
-      {/* Floating Cart Sticky Bar (แสดงขึ้นมาเมื่อมีสินค้าในตะกร้า) */}
+      {/* Floating Cart Sticky Bar */}
       {cart.length > 0 && (
         <div className="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-20">
           <Link

@@ -37,10 +37,10 @@ export default function SplashScreen() {
         
         <div className="space-y-2">
           <span className="text-xs font-semibold uppercase tracking-widest text-orange-600 dark:text-orange-400">
-            Campus Meatballs
+            PONGHUH MEATBALLS
           </span>
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-            ร้านลูกชิ้นเด็กหอ <br />
+            ร้านลูกชิ้น ponghuh <br />
             <span className="bg-gradient-to-r from-orange-500 to-red-600 bg-clip-text text-transparent">
               ทอดร้อนๆ น้ำจิ้มเด็ด
             </span>
