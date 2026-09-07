@@ -75,7 +75,8 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     tag: "ยอดฮิต",
     category: "ไส้กรอก",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1541014741259-de529411b96a?w=500&q=80",
+    // แก้ไขรูปภาพให้ตรงกับไส้กรอกทอด/ฮอทดอก (จากรูปสลัดโรลเป็นรูปไส้กรอกจริง)
+    image: "https://images.unsplash.com/photo-1619740455993-9e612b1af08a?w=500&q=80",
     badge: "กรอบฟู",
     badgeColor: "bg-amber-500",
   },
@@ -120,14 +121,12 @@ export default function HomePage() {
   const [paymentMethod, setPaymentMethod] = useState("qr");
   const [cart, setCart] = useState<Record<string, number>>({});
 
-  // State สำหรับการเปิด/ปิด Modal เพิ่มสินค้า
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newCategory, setNewCategory] = useState("ลูกชิ้นปิ้ง");
   const [newImage, setNewImage] = useState<string>("");
 
-  // ฟังก์ชันรองรับการอัปโหลดรูปภาพ
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -139,7 +138,6 @@ export default function HomePage() {
     }
   };
 
-  // ฟังก์ชันบันทึกสินค้าใหม่
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle || !newPrice) {
@@ -164,7 +162,6 @@ export default function HomePage() {
     setProducts((prev) => [newItem, ...prev]);
     setShowAddModal(false);
 
-    // ล้างค่าในฟอร์ม
     setNewTitle("");
     setNewPrice("");
     setNewImage("");
@@ -654,7 +651,6 @@ export default function HomePage() {
             </div>
 
             <form onSubmit={handleAddProduct} className="mt-4 space-y-4">
-              {/* UPLOAD IMAGE AREA */}
               <div>
                 <label className="block text-xs font-semibold mb-2">
                   รูปภาพสินค้า
@@ -695,7 +691,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* TITLE */}
               <div>
                 <label className="block text-xs font-semibold mb-1">
                   ชื่อสินค้า / เมนู
@@ -714,7 +709,6 @@ export default function HomePage() {
                 />
               </div>
 
-              {/* PRICE & CATEGORY */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold mb-1">
@@ -757,7 +751,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* ACTION BUTTONS */}
               <div className="flex gap-2 pt-2">
                 <button
                   type="button"
