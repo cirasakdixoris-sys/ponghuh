@@ -1,212 +1,514 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { Search, Bell, Plus, Flame, Sparkles, ShoppingBag, Check, Sun, Moon } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import {
+  Search,
+  ShoppingCart,
+  Bell,
+  Sun,
+  Moon,
+  SlidersHorizontal,
+  Trash2,
+  Plus,
+  Minus,
+  Heart,
+  Truck,
+  ShieldCheck,
+  Headphones,
+  Star,
+  X,
+  ImageIcon,
+  QrCode,
+  CreditCard,
+  Banknote,
+} from "lucide-react";
 
-const CATEGORIES = ['ทั้งหมด', 'ลูกชิ้นทอด', 'ลูกชิ้นปิ้ง', 'ไส้กรอก', 'ชุดรวมฮิต', 'เครื่องดื่ม'];
+type ProductItem = {
+  id: string;
+  title: string;
+  price: number;
+  department: string;
+  timeAgo: string;
+  tag: string;
+  category: string;
+  has3D: boolean;
+  image: string;
+  badge?: string;
+  badgeColor?: string;
+};
 
-const PRODUCTS = [
-  {
-    id: 1,
-    title: 'ลูกชิ้นเนื้อแท้ไร้แป้ง (ไม้ละ 10.-)',
-    price: 10,
-    category: 'ลูกชิ้นปิ้ง',
-    seller: 'ร้านพี่หมู หน้าตึก 3',
-    image: 'https://images.unsplash.com/photo-1529042410759-befb1204b468?w=400&q=80',
-  },
-  {
-    id: 2,
-    title: 'ชุดรวมมิตรทอดกรอบ + น้ำจิ้มสูตรเด็ด',
-    price: 50,
-    category: 'ชุดรวมฮิต',
-    seller: 'ร้านพี่หมู หน้าตึก 3',
-    image: 'https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=400&q=80',
-  },
-  {
-    id: 3,
-    title: 'ไส้กรอกแดงในตำนานทอดกรอบ',
-    price: 20,
-    category: 'ไส้กรอก',
-    seller: 'ซุ้มข้างลานกิจกรรม',
-    image: 'https://images.unsplash.com/photo-1625938146369-ad8024139380?w=400&q=80',
-  },
-  {
-    id: 4,
-    title: 'ลูกชิ้นเอ็นหมูปิ้ง น้ำจิ้มพริกเผา',
-    price: 12,
-    category: 'ลูกชิ้นปิ้ง',
-    seller: 'ร้านพี่หมู หน้าตึก 3',
-    image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80',
-  },
-  {
-    id: 5,
-    title: 'ชาดำเย็นหวานน้อย แก้วใหญ่',
-    price: 25,
-    category: 'เครื่องดื่ม',
-    seller: 'ร้านน้ำป้าจอย',
-    image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80',
-  },
+const PRODUCTS: ProductItem[] = [];
+
+const CATEGORIES = [
+  "ทั้งหมด",
+  "กาแฟ",
+  "ชาและนม",
+  "อิตาเลียนโซดา",
+  "สมูทตี้และผลไม้",
+  "เบเกอรี่และของทานเล่น",
 ];
 
 export default function HomePage() {
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('ทั้งหมด');
-  const [cart, setCart] = useState<{ id: number; price: number }[]>([]);
-  const [addedAnimation, setAddedAnimation] = useState<number | null>(null);
+  const [category, setCategory] = useState("ทั้งหมด");
+  const [search, setSearch] = useState("");
+  const [darkMode, setDarkMode] = useState(false); // ตั้งเป็น false เพื่อให้แสดงธีมครีมสดใสเป็นค่าเริ่มต้น
+  const [showCart, setShowCart] = useState(true);
+  const [paymentMethod, setPaymentMethod] = useState("qr");
 
-  useEffect(() => setMounted(true), []);
+  const [cart, setCart] = useState<Record<string, number>>({});
 
-  const filteredProducts = selectedCategory === 'ทั้งหมด'
-    ? PRODUCTS
-    : PRODUCTS.filter((item) => item.category === selectedCategory);
+  const filteredProducts = useMemo(() => {
+    return PRODUCTS.filter((product: ProductItem) => {
+      const matchCategory =
+        category === "ทั้งหมด" || product.category === category;
 
-  const addToCart = (e: React.MouseEvent, product: { id: number; price: number }) => {
-    e.preventDefault();
-    setCart((prev) => [...prev, product]);
-    setAddedAnimation(product.id);
-    setTimeout(() => setAddedAnimation(null), 1000);
+      const matchSearch = product.title
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+      return matchCategory && matchSearch;
+    });
+  }, [category, search]);
+
+  const cartItems = PRODUCTS.filter((product: ProductItem) => cart[product.id]);
+
+  const total = cartItems.reduce(
+    (sum: number, product: ProductItem) => sum + product.price * cart[product.id],
+    0
+  );
+
+  const cartCount = Object.values(cart).reduce((sum, value) => sum + value, 0);
+
+  const addToCart = (id: string) => {
+    setCart((prev) => ({
+      ...prev,
+      [id]: (prev[id] || 0) + 1,
+    }));
+    setShowCart(true);
   };
 
-  const totalPrice = cart.reduce((sum, item) => sum + item.price, 0);
+  const decreaseCart = (id: string) => {
+    setCart((prev) => {
+      const next = { ...prev };
+
+      if (!next[id]) return next;
+
+      if (next[id] <= 1) {
+        delete next[id];
+      } else {
+        next[id]--;
+      }
+
+      return next;
+    });
+  };
+
+  const removeFromCart = (id: string) => {
+    setCart((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
+  // โทนสีพื้นหลังหลัก (Light: สีครีมอุ่นนวล | Dark: สีน้ำตาลกาแฟเข้ม)
+  const bg = darkMode
+    ? "bg-[#1A1614] text-[#F3EBE1]"
+    : "bg-[#FAF7F2] text-[#4A3E3D]";
 
   return (
-    <div className="min-h-screen pb-28 max-w-md mx-auto bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300 relative">
-      {/* Header */}
-      <header className="sticky top-0 z-10 bg-slate-50/80 dark:bg-slate-950/80 backdrop-blur-md p-4 space-y-3 border-b border-slate-200 dark:border-slate-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xs text-slate-500 dark:text-slate-400">หิวหรือยัง 👋</h2>
-            <h1 className="text-lg font-bold">ร้านลูกชิ้น ponghuh</h1>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {/* ปุ่มสลับโหมดกลางวัน / กลางคืน */}
-            {mounted && (
-              <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:scale-105 transition-all"
-                aria-label="Toggle Theme"
-              >
-                {theme === 'dark' ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} />}
-              </button>
-            )}
+    <main className={`min-h-screen ${bg} transition-colors duration-300 font-sans`}>
+      {/* HEADER */}
+      <header
+        className={`sticky top-0 z-50 border-b ${
+          darkMode
+            ? "bg-[#1A1614]/95 border-[#2D2421]"
+            : "bg-[#FAF7F2]/95 border-[#E8DFC8]"
+        } backdrop-blur`}
+      >
+        <div className="max-w-[1600px] mx-auto px-5 py-4">
+          <div className="flex items-center gap-5">
+            {/* LOGO */}
+            <Link
+              href="/home"
+              className="flex items-center gap-3 min-w-[230px]"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border-2 border-amber-600 flex items-center justify-center text-2xl shadow-sm">
+                🥤
+              </div>
 
-            <button className="p-2 rounded-full bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 relative">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
+              <div>
+                <h1 className="text-xl font-bold text-amber-800 dark:text-amber-500">
+                  Aum Shop 🥤
+                </h1>
+                <p className="text-xs text-amber-700/60 dark:text-amber-200/50">
+                  เครื่องดื่มและเบเกอรี่อร่อยๆ ❤️
+                </p>
+              </div>
+            </Link>
+
+            {/* SEARCH */}
+            <div className="flex-1 relative max-w-3xl">
+              <Search
+                size={20}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-700/50 dark:text-amber-200/50"
+              />
+
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="ค้นหาเมนูเครื่องดื่มสุดโปรด..."
+                className={`w-full rounded-full py-3 pl-12 pr-5 outline-none border transition ${
+                  darkMode
+                    ? "bg-[#26201D] border-[#3D332E] text-white placeholder:text-amber-200/30 focus:border-amber-500"
+                    : "bg-white border-[#E5DDC8] text-[#4A3E3D] placeholder:text-amber-900/40 focus:border-amber-600"
+                }`}
+              />
+            </div>
+
+            {/* FILTER */}
+            <button
+              className={`hidden lg:flex items-center gap-2 px-5 py-3 rounded-full border transition ${
+                darkMode
+                  ? "bg-[#26201D] border-[#3D332E] hover:border-amber-500"
+                  : "bg-white border-[#E5DDC8] hover:border-amber-600"
+              }`}
+            >
+              <SlidersHorizontal size={18} />
+              ตัวกรอง
+            </button>
+
+            {/* ACTIONS */}
+            <button className="relative p-3 rounded-full hover:bg-amber-500/10 transition">
+              <Bell size={22} />
+              <span className="absolute -right-0.5 -top-0.5 w-5 h-5 rounded-full bg-amber-600 text-white text-xs flex items-center justify-center font-bold">
+                0
+              </span>
+            </button>
+
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-3 rounded-full hover:bg-amber-500/10 transition"
+            >
+              {darkMode ? <Sun size={22} className="text-amber-400" /> : <Moon size={22} className="text-amber-800" />}
+            </button>
+
+            <button
+              onClick={() => setShowCart(!showCart)}
+              className="relative p-3 rounded-full hover:bg-amber-500/10 transition"
+            >
+              <ShoppingCart size={24} />
+
+              {cartCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 w-5 h-5 rounded-full bg-amber-600 text-white text-xs font-bold flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
             </button>
           </div>
-        </div>
-
-        {/* Search Bar */}
-        <div className="relative">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="ค้นหาลูกชิ้น, ไส้กรอก, น้ำจิ้ม..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-200/60 dark:bg-slate-900 border-none text-sm focus:ring-2 focus:ring-orange-500 outline-none placeholder:text-slate-400"
-          />
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="p-4 space-y-6">
-        {/* Categories Bar */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
-          {CATEGORIES.map((cat) => (
+      {/* CATEGORY */}
+      <div className="max-w-[1600px] mx-auto px-5 py-5">
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          {CATEGORIES.map((item) => (
             <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
-                selectedCategory === cat
-                  ? 'bg-orange-500 text-white shadow-md shadow-orange-500/20'
-                  : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300'
+              key={item}
+              onClick={() => setCategory(item)}
+              className={`whitespace-nowrap px-6 py-2.5 rounded-full font-medium transition text-sm ${
+                category === item
+                  ? "bg-amber-700 text-white shadow-md dark:bg-amber-600"
+                  : darkMode
+                  ? "bg-[#26201D] border border-[#3D332E] hover:border-amber-500 text-amber-100/80"
+                  : "bg-white border border-[#E5DDC8] hover:border-amber-600 text-[#5C4D4B]"
               }`}
             >
-              {cat}
+              {item}
             </button>
           ))}
         </div>
+      </div>
 
-        {/* Product Grid */}
-        <section className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm flex items-center gap-1.5">
-              <Flame size={16} className="text-orange-500" /> {selectedCategory} ({filteredProducts.length})
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            {filteredProducts.map((item) => (
-              <div
-                key={item.id}
-                className="group bg-white dark:bg-slate-900 rounded-2xl p-2.5 border border-slate-200/80 dark:border-slate-800/80 shadow-sm flex flex-col justify-between relative"
-              >
-                <Link href="/product" className="block">
-                  <div className="relative aspect-square rounded-xl overflow-hidden mb-2 bg-slate-100 dark:bg-slate-800">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-md text-[10px] text-white">
-                      {item.category}
-                    </span>
-                  </div>
-                  <h4 className="text-xs font-semibold line-clamp-2 mb-1">{item.title}</h4>
-                </Link>
-
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/50 flex items-center justify-between mt-1">
+      {/* CONTENT */}
+      <div className="max-w-[1600px] mx-auto px-5 pb-8">
+        <div
+          className={`grid gap-6 ${
+            showCart
+              ? "grid-cols-1 xl:grid-cols-[1fr_380px]"
+              : "grid-cols-1"
+          }`}
+        >
+          {/* PRODUCTS */}
+          <section>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4">
+              {filteredProducts.map((product: ProductItem) => (
+                <div
+                  key={product.id}
+                  className={`rounded-2xl overflow-hidden border p-4 transition hover:-translate-y-1 hover:shadow-lg flex flex-col justify-between ${
+                    darkMode
+                      ? "bg-[#231D1A] border-[#362C27] hover:border-amber-500/50"
+                      : "bg-white border-[#EFE8D8] hover:border-amber-600/40"
+                  }`}
+                >
                   <div>
-                    <div className="text-[10px] text-slate-400 flex items-center gap-0.5">
-                      <Sparkles size={10} /> {item.seller}
+                    {/* PRODUCT IMAGE */}
+                    <div className="w-full h-36 rounded-xl bg-amber-50/50 dark:bg-[#1A1614] border border-amber-100 dark:border-[#3D332E] mb-3 flex items-center justify-center relative overflow-hidden">
+                      {product.image ? (
+                        <img
+                          src={product.image}
+                          alt={product.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <ImageIcon size={28} className="text-amber-800/30 dark:text-amber-200/20" />
+                      )}
+
+                      {product.badge && (
+                        <span
+                          className={`absolute top-2 left-2 ${product.badgeColor} text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm`}
+                        >
+                          {product.badge}
+                        </span>
+                      )}
+
+                      <button className="absolute top-2 right-2 p-1.5 rounded-full bg-black/20 text-white hover:text-red-500 transition backdrop-blur-sm">
+                        <Heart size={15} />
+                      </button>
                     </div>
-                    <div className="text-sm font-bold text-orange-600 dark:text-orange-400">
-                      {item.price} ฿
+
+                    <span className="text-xs text-amber-700 dark:text-amber-400 font-semibold">
+                      {product.category}
+                    </span>
+
+                    <Link href={`/product?id=${product.id}`}>
+                      <h2 className="font-semibold mt-1 text-sm leading-5 line-clamp-2 hover:text-amber-600">
+                        {product.title}
+                      </h2>
+                    </Link>
+                  </div>
+
+                  <div className="flex items-center justify-between mt-4 pt-3 border-t border-amber-100 dark:border-[#362C27]">
+                    <span className="text-base font-bold text-amber-800 dark:text-amber-400">
+                      ฿{product.price.toLocaleString()}
+                    </span>
+
+                    <button
+                      onClick={() => addToCart(product.id)}
+                      className="w-8 h-8 rounded-full bg-amber-700 dark:bg-amber-600 text-white flex items-center justify-center hover:bg-amber-800 transition shadow-sm"
+                    >
+                      <ShoppingCart size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-20 text-amber-800/40 dark:text-amber-200/30">
+                <ImageIcon size={50} className="mx-auto mb-4 opacity-40" />
+                <p className="text-base font-medium">ยังไม่มีรายการเมนูในขณะนี้</p>
+                <p className="text-xs mt-1">
+                  เพิ่มรายการเมนูน้ำพร้อมรูปภาพของคุณได้ในอาร์เรย์ PRODUCTS ด้านบน
+                </p>
+              </div>
+            )}
+
+            {/* FEATURES */}
+            <div
+              className={`grid grid-cols-2 md:grid-cols-4 gap-5 mt-8 pt-7 border-t ${
+                darkMode ? "border-[#2D2421]" : "border-[#E8DFC8]"
+              }`}
+            >
+              <Feature icon={<Truck />} title="จัดส่งไว" text="พร้อมเสิร์ฟถึงมือ" />
+              <Feature icon={<ShieldCheck />} title="สดใหม่ทุกแก้ว" text="วัตถุดิบพรีเมียม" />
+              <Feature icon={<Headphones />} title="บริการดีเยี่ยม" text="เปิด 08:00 - 18:00" />
+              <Feature icon={<Star />} title="การันตีความอร่อย" text="รีวิวแน่นจากลูกค้า" />
+            </div>
+          </section>
+
+          {/* CART */}
+          {showCart && (
+            <aside
+              className={`rounded-2xl border h-fit sticky top-24 shadow-sm ${
+                darkMode
+                  ? "bg-[#231D1A] border-[#362C27]"
+                  : "bg-white border-[#EFE8D8]"
+              }`}
+            >
+              <div className="flex items-center justify-between p-5 border-b border-amber-100 dark:border-[#362C27]">
+                <h2 className="text-lg font-bold text-amber-900 dark:text-amber-100">
+                  รายการที่สั่ง ({cartCount})
+                </h2>
+
+                <button
+                  onClick={() => setShowCart(false)}
+                  className="text-amber-800/50 hover:text-amber-800 dark:text-amber-200/50 dark:hover:text-white"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-4 space-y-4">
+                {cartItems.length === 0 ? (
+                  <div className="text-center py-10 text-amber-800/40 dark:text-amber-200/30">
+                    <ShoppingCart
+                      size={45}
+                      className="mx-auto mb-3 opacity-40"
+                    />
+                    <p className="text-sm">ยังไม่มีเมนูในตะกร้า</p>
+                  </div>
+                ) : (
+                  cartItems.map((product: ProductItem) => (
+                    <div
+                      key={product.id}
+                      className="flex gap-3 pb-4 border-b border-amber-100 dark:border-[#362C27] items-center"
+                    >
+                      <div className="w-14 h-14 rounded-xl bg-amber-50 dark:bg-[#1A1614] border border-amber-100 dark:border-[#3D332E] flex items-center justify-center shrink-0 overflow-hidden">
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.title}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <ImageIcon size={20} className="text-amber-800/30 dark:text-amber-200/20" />
+                        )}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-semibold line-clamp-1">
+                          {product.title}
+                        </h3>
+
+                        <div className="flex items-center justify-between mt-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => decreaseCart(product.id)}
+                              className="w-5 h-5 rounded bg-amber-100 dark:bg-[#362C27] text-amber-800 dark:text-amber-200 flex items-center justify-center hover:bg-amber-200"
+                            >
+                              <Minus size={10} />
+                            </button>
+
+                            <span className="text-xs font-semibold">
+                              {cart[product.id]}
+                            </span>
+
+                            <button
+                              onClick={() => addToCart(product.id)}
+                              className="w-5 h-5 rounded bg-amber-100 dark:bg-[#362C27] text-amber-800 dark:text-amber-200 flex items-center justify-center hover:bg-amber-200"
+                            >
+                              <Plus size={10} />
+                            </button>
+                          </div>
+
+                          <span className="font-bold text-amber-800 dark:text-amber-400 text-sm">
+                            ฿
+                            {(
+                              product.price * cart[product.id]
+                            ).toLocaleString()}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() => removeFromCart(product.id)}
+                          className="text-[11px] text-red-500/80 mt-1 flex items-center gap-1 hover:text-red-600"
+                        >
+                          <Trash2 size={11} />
+                          ลบรายการ
+                        </button>
+                      </div>
                     </div>
+                  ))
+                )}
+
+                {/* PAYMENT METHOD SELECTION */}
+                <div className="pt-3 border-t border-amber-100 dark:border-[#362C27]">
+                  <p className="text-xs font-bold text-amber-900/80 dark:text-amber-200/80 mb-2">
+                    เลือกช่องทางชำระเงิน
+                  </p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      onClick={() => setPaymentMethod("qr")}
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium ${
+                        paymentMethod === "qr"
+                          ? "border-amber-700 bg-amber-700/10 text-amber-800 dark:text-amber-400 dark:border-amber-500"
+                          : "border-amber-100 dark:border-[#362C27] bg-amber-50/50 dark:bg-[#1A1614] text-amber-900/60 dark:text-amber-200/50"
+                      }`}
+                    >
+                      <QrCode size={18} className="mb-1" />
+                      PromptPay
+                    </button>
+
+                    <button
+                      onClick={() => setPaymentMethod("transfer")}
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium ${
+                        paymentMethod === "transfer"
+                          ? "border-amber-700 bg-amber-700/10 text-amber-800 dark:text-amber-400 dark:border-amber-500"
+                          : "border-amber-100 dark:border-[#362C27] bg-amber-50/50 dark:bg-[#1A1614] text-amber-900/60 dark:text-amber-200/50"
+                      }`}
+                    >
+                      <CreditCard size={18} className="mb-1" />
+                      โอนเงิน
+                    </button>
+
+                    <button
+                      onClick={() => setPaymentMethod("cash")}
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium ${
+                        paymentMethod === "cash"
+                          ? "border-amber-700 bg-amber-700/10 text-amber-800 dark:text-amber-400 dark:border-amber-500"
+                          : "border-amber-100 dark:border-[#362C27] bg-amber-50/50 dark:bg-[#1A1614] text-amber-900/60 dark:text-amber-200/50"
+                      }`}
+                    >
+                      <Banknote size={18} className="mb-1" />
+                      เงินสด
+                    </button>
+                  </div>
+                </div>
+
+                {/* TOTAL */}
+                <div className="pt-2">
+                  <div className="flex justify-between text-base font-bold text-amber-900 dark:text-amber-100">
+                    <span>ยอดชำระทั้งหมด</span>
+                    <span className="text-amber-700 dark:text-amber-400 text-lg">
+                      ฿{total.toLocaleString()}
+                    </span>
                   </div>
 
                   <button
-                    onClick={(e) => addToCart(e, item)}
-                    className={`p-2 rounded-xl transition-all active:scale-90 ${
-                      addedAnimation === item.id
-                        ? 'bg-green-500 text-white'
-                        : 'bg-orange-500 text-white shadow-md shadow-orange-500/20 hover:bg-orange-600'
-                    }`}
-                    aria-label="Add to Cart"
+                    disabled={cartItems.length === 0}
+                    className="w-full mt-4 bg-amber-700 hover:bg-amber-800 dark:bg-amber-600 dark:hover:bg-amber-500 disabled:bg-amber-100 dark:disabled:bg-[#2D2421] disabled:text-amber-800/30 text-white font-bold py-3 rounded-xl transition shadow-md"
                   >
-                    {addedAnimation === item.id ? <Check size={16} /> : <Plus size={16} />}
+                    ยืนยันการสั่งซื้อ
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        </section>
-      </main>
-
-      {/* Floating Cart Sticky Bar */}
-      {cart.length > 0 && (
-        <div className="fixed bottom-4 left-4 right-4 max-w-md mx-auto z-20">
-          <Link
-            href="/product"
-            className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-orange-500 to-red-600 text-white font-semibold flex items-center justify-between shadow-xl shadow-orange-500/30 active:scale-95 transition-all"
-          >
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <ShoppingBag size={22} />
-                <span className="absolute -top-2 -right-2 w-5 h-5 bg-white text-orange-600 rounded-full text-xs font-extrabold flex items-center justify-center shadow-sm">
-                  {cart.length}
-                </span>
-              </div>
-              <span className="text-sm">ตะกร้าของคุณ</span>
-            </div>
-            <div className="text-sm font-extrabold">{totalPrice} ฿ →</div>
-          </Link>
+            </aside>
+          )}
         </div>
-      )}
+      </div>
+    </main>
+  );
+}
+
+function Feature({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="text-amber-700 dark:text-amber-400">{icon}</div>
+
+      <div>
+        <p className="font-semibold text-sm text-amber-900 dark:text-amber-200">{title}</p>
+        <p className="text-xs text-amber-800/60 dark:text-amber-200/50">{text}</p>
+      </div>
     </div>
   );
 }
