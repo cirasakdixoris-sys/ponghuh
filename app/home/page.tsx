@@ -75,7 +75,6 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     tag: "ยอดฮิต",
     category: "ไส้กรอก",
     has3D: false,
-    // แก้ไขรูปภาพให้ตรงกับไส้กรอกทอด/ฮอทดอก (จากรูปสลัดโรลเป็นรูปไส้กรอกจริง)
     image: "https://images.unsplash.com/photo-1619740455993-9e612b1af08a?w=500&q=80",
     badge: "กรอบฟู",
     badgeColor: "bg-amber-500",
@@ -166,6 +165,19 @@ export default function HomePage() {
     setNewPrice("");
     setNewImage("");
     setNewCategory("ลูกชิ้นปิ้ง");
+  };
+
+  // ฟังก์ชันสำหรับลบรายการสินค้าออกจากหน้าร้าน
+  const handleDeleteProduct = (id: string, title: string) => {
+    if (confirm(`คุณต้องการลบรายการ "${title}" ออกจากร้านใช่หรือไม่?`)) {
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+      // ลบออกจากตะกร้าด้วยหากมีอยู่นะ
+      setCart((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
+    }
   };
 
   const filteredProducts = useMemo(() => {
@@ -386,7 +398,7 @@ export default function HomePage() {
                   }`}
                 >
                   <div>
-                    {/* PRODUCT IMAGE */}
+                    {/* PRODUCT IMAGE & ACTION BUTTONS */}
                     <div className="w-full h-36 rounded-xl bg-orange-50/50 dark:bg-[#1A1614] border border-orange-100 dark:border-[#3D332E] mb-3 flex items-center justify-center relative overflow-hidden">
                       {product.image ? (
                         <img
@@ -406,9 +418,24 @@ export default function HomePage() {
                         </span>
                       )}
 
-                      <button type="button" className="absolute top-2 right-2 p-1.5 rounded-full bg-black/20 text-white hover:text-red-500 transition backdrop-blur-sm cursor-pointer">
-                        <Heart size={15} />
-                      </button>
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                        {/* ปุ่มกดลบรายการสินค้า */}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProduct(product.id, product.title)}
+                          title="ลบรายการนี้"
+                          className="p-1.5 rounded-full bg-red-600/80 text-white hover:bg-red-600 transition backdrop-blur-sm cursor-pointer shadow-sm"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+
+                        <button
+                          type="button"
+                          className="p-1.5 rounded-full bg-black/20 text-white hover:text-red-500 transition backdrop-blur-sm cursor-pointer"
+                        >
+                          <Heart size={14} />
+                        </button>
+                      </div>
                     </div>
 
                     <span className="text-xs text-orange-700 dark:text-orange-400 font-semibold">
