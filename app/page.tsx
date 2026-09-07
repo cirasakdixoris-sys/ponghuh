@@ -1,65 +1,69 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import Link from 'next/link';
+import { ShoppingBag, ArrowRight, Sun, Moon } from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
+
+export default function SplashScreen() {
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen flex flex-col justify-between p-6 max-w-md mx-auto relative overflow-hidden">
+      {/* Background Decorative Blur */}
+      <div className="absolute top-10 -left-20 w-60 h-60 bg-blue-500/20 rounded-full blur-3xl -z-10" />
+      <div className="absolute bottom-10 -right-20 w-60 h-60 bg-purple-500/20 rounded-full blur-3xl -z-10" />
+
+      {/* Top Bar: Toggle Theme */}
+      <div className="flex justify-end pt-2">
+        {mounted && (
+          <button
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            className="p-2.5 rounded-full bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-md text-slate-700 dark:text-slate-200 hover:scale-105 transition-all"
+            aria-label="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+        )}
+      </div>
+
+      {/* Hero / Brand Section */}
+      <div className="flex flex-col items-center text-center my-auto space-y-6">
+        <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-xl shadow-blue-500/20 animate-bounce">
+          <ShoppingBag size={48} className="text-white" />
+        </div>
+        
+        <div className="space-y-2">
+          <span className="text-xs font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">
+            College Marketplace
+          </span>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">
+            ตลาดนัดเด็กหอ <br />
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              ซื้อง่าย ขายคล่อง
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+            แหล่งรวมหนังสือ เครื่องใช้ อุปกรณ์การเรียน และสินค้าส่งต่อจากเพื่อนๆ ในวิทยาลัย
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </div>
+
+      {/* Bottom CTA Button */}
+      <div className="pb-6 space-y-3">
+        <Link
+          href="/home"
+          className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold flex items-center justify-center gap-2 shadow-lg shadow-blue-500/30 hover:opacity-95 active:scale-95 transition-all"
+        >
+          เริ่มต้นใช้งาน <ArrowRight size={18} />
+        </Link>
+        <p className="text-xs text-center text-slate-400">
+          เฉพาะนักศึกษาและบุคลากรภายในวิทยาลัยเท่านั้น
+        </p>
+      </div>
+    </main>
   );
 }
