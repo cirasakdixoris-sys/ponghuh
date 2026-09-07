@@ -15,7 +15,6 @@ import {
   Heart,
   Truck,
   ShieldCheck,
-  Headphones,
   Star,
   X,
   ImageIcon,
@@ -39,7 +38,7 @@ type ProductItem = {
   badgeColor?: string;
 };
 
-// แก้ไข URL รูปภาพให้ตรงกับรายการเมนูทุกรายการเรียบร้อยแล้ว
+// แก้ไขรูปภาพให้ตรงตามรายการสินค้าทุกรายการเรียบร้อยแล้ว
 const PRODUCTS: ProductItem[] = [
   {
     id: "1",
@@ -76,7 +75,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "ยอดฮิต",
     category: "ไส้กรอก",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1541745537411-b8046dc6d66c?w=500&q=80",
+    image: "https://images.unsplash.com/photo-1585325701165-351af916e581?w=500&q=80",
     badge: "กรอบฟู",
     badgeColor: "bg-amber-500",
   },
@@ -89,7 +88,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "ใหม่",
     category: "ลูกชิ้นปิ้ง",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=500&q=80",
+    image: "https://images.unsplash.com/photo-1599488615731-7e5c2823ff28?w=500&q=80",
   },
   {
     id: "5",
@@ -175,6 +174,19 @@ export default function HomePage() {
     });
   };
 
+  const handleCheckout = () => {
+    if (cartItems.length === 0) return;
+
+    const paymentNames: Record<string, string> = {
+      qr: "PromptPay",
+      transfer: "โอนเงิน",
+      cash: "เงินสด",
+    };
+
+    alert(`สั่งซื้อเรียบร้อยแล้ว!\nชำระด้วย: ${paymentNames[paymentMethod]}\nยอดรวม: ฿${total}`);
+    setCart({});
+  };
+
   const bg = darkMode
     ? "bg-[#1A1614] text-[#F3EBE1]"
     : "bg-[#FAF7F2] text-[#4A3E3D]";
@@ -231,7 +243,8 @@ export default function HomePage() {
 
             {/* FILTER */}
             <button
-              className={`hidden lg:flex items-center gap-2 px-5 py-3 rounded-full border transition ${
+              type="button"
+              className={`hidden lg:flex items-center gap-2 px-5 py-3 rounded-full border transition cursor-pointer ${
                 darkMode
                   ? "bg-[#26201D] border-[#3D332E] hover:border-orange-500"
                   : "bg-white border-[#E5DDC8] hover:border-orange-600"
@@ -242,7 +255,7 @@ export default function HomePage() {
             </button>
 
             {/* ACTIONS */}
-            <button className="relative p-3 rounded-full hover:bg-orange-500/10 transition">
+            <button type="button" className="relative p-3 rounded-full hover:bg-orange-500/10 transition cursor-pointer">
               <Bell size={22} />
               <span className="absolute -right-0.5 -top-0.5 w-5 h-5 rounded-full bg-orange-600 text-white text-xs flex items-center justify-center font-bold">
                 0
@@ -250,15 +263,17 @@ export default function HomePage() {
             </button>
 
             <button
+              type="button"
               onClick={() => setDarkMode(!darkMode)}
-              className="p-3 rounded-full hover:bg-orange-500/10 transition"
+              className="p-3 rounded-full hover:bg-orange-500/10 transition cursor-pointer"
             >
               {darkMode ? <Sun size={22} className="text-yellow-400" /> : <Moon size={22} className="text-orange-800" />}
             </button>
 
             <button
+              type="button"
               onClick={() => setShowCart(!showCart)}
-              className="relative p-3 rounded-full hover:bg-orange-500/10 transition"
+              className="relative p-3 rounded-full hover:bg-orange-500/10 transition cursor-pointer"
             >
               <ShoppingCart size={24} />
 
@@ -278,8 +293,9 @@ export default function HomePage() {
           {CATEGORIES.map((item) => (
             <button
               key={item}
+              type="button"
               onClick={() => setCategory(item)}
-              className={`whitespace-nowrap px-6 py-2.5 rounded-full font-medium transition text-sm ${
+              className={`whitespace-nowrap px-6 py-2.5 rounded-full font-medium transition text-sm cursor-pointer ${
                 category === item
                   ? "bg-orange-600 text-white shadow-md dark:bg-orange-600"
                   : darkMode
@@ -335,7 +351,7 @@ export default function HomePage() {
                         </span>
                       )}
 
-                      <button className="absolute top-2 right-2 p-1.5 rounded-full bg-black/20 text-white hover:text-red-500 transition backdrop-blur-sm">
+                      <button type="button" className="absolute top-2 right-2 p-1.5 rounded-full bg-black/20 text-white hover:text-red-500 transition backdrop-blur-sm cursor-pointer">
                         <Heart size={15} />
                       </button>
                     </div>
@@ -357,8 +373,9 @@ export default function HomePage() {
                     </span>
 
                     <button
+                      type="button"
                       onClick={() => addToCart(product.id)}
-                      className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center hover:bg-orange-700 transition shadow-sm"
+                      className="w-8 h-8 rounded-full bg-orange-600 text-white flex items-center justify-center hover:bg-orange-700 transition shadow-sm cursor-pointer active:scale-95"
                     >
                       <ShoppingCart size={14} />
                     </button>
@@ -402,8 +419,9 @@ export default function HomePage() {
                 </h2>
 
                 <button
+                  type="button"
                   onClick={() => setShowCart(false)}
-                  className="text-orange-800/50 hover:text-orange-800 dark:text-orange-200/50 dark:hover:text-white"
+                  className="text-orange-800/50 hover:text-orange-800 dark:text-orange-200/50 dark:hover:text-white cursor-pointer"
                 >
                   <X size={20} />
                 </button>
@@ -444,8 +462,9 @@ export default function HomePage() {
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center gap-2">
                             <button
+                              type="button"
                               onClick={() => decreaseCart(product.id)}
-                              className="w-5 h-5 rounded bg-orange-100 dark:bg-[#362C27] text-orange-800 dark:text-orange-200 flex items-center justify-center hover:bg-orange-200"
+                              className="w-5 h-5 rounded bg-orange-100 dark:bg-[#362C27] text-orange-800 dark:text-orange-200 flex items-center justify-center hover:bg-orange-200 cursor-pointer"
                             >
                               <Minus size={10} />
                             </button>
@@ -455,8 +474,9 @@ export default function HomePage() {
                             </span>
 
                             <button
+                              type="button"
                               onClick={() => addToCart(product.id)}
-                              className="w-5 h-5 rounded bg-orange-100 dark:bg-[#362C27] text-orange-800 dark:text-orange-200 flex items-center justify-center hover:bg-orange-200"
+                              className="w-5 h-5 rounded bg-orange-100 dark:bg-[#362C27] text-orange-800 dark:text-orange-200 flex items-center justify-center hover:bg-orange-200 cursor-pointer"
                             >
                               <Plus size={10} />
                             </button>
@@ -471,8 +491,9 @@ export default function HomePage() {
                         </div>
 
                         <button
+                          type="button"
                           onClick={() => removeFromCart(product.id)}
-                          className="text-[11px] text-red-500/80 mt-1 flex items-center gap-1 hover:text-red-600"
+                          className="text-[11px] text-red-500/80 mt-1 flex items-center gap-1 hover:text-red-600 cursor-pointer"
                         >
                           <Trash2 size={11} />
                           ลบรายการ
@@ -489,8 +510,9 @@ export default function HomePage() {
                   </p>
                   <div className="grid grid-cols-3 gap-2">
                     <button
+                      type="button"
                       onClick={() => setPaymentMethod("qr")}
-                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium ${
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium cursor-pointer ${
                         paymentMethod === "qr"
                           ? "border-orange-600 bg-orange-600/10 text-orange-800 dark:text-orange-400 dark:border-orange-500"
                           : "border-orange-100 dark:border-[#362C27] bg-orange-50/50 dark:bg-[#1A1614] text-orange-900/60 dark:text-orange-200/50"
@@ -501,8 +523,9 @@ export default function HomePage() {
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => setPaymentMethod("transfer")}
-                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium ${
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium cursor-pointer ${
                         paymentMethod === "transfer"
                           ? "border-orange-600 bg-orange-600/10 text-orange-800 dark:text-orange-400 dark:border-orange-500"
                           : "border-orange-100 dark:border-[#362C27] bg-orange-50/50 dark:bg-[#1A1614] text-orange-900/60 dark:text-orange-200/50"
@@ -513,8 +536,9 @@ export default function HomePage() {
                     </button>
 
                     <button
+                      type="button"
                       onClick={() => setPaymentMethod("cash")}
-                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium ${
+                      className={`flex flex-col items-center justify-center p-2.5 rounded-xl border transition text-xs font-medium cursor-pointer ${
                         paymentMethod === "cash"
                           ? "border-orange-600 bg-orange-600/10 text-orange-800 dark:text-orange-400 dark:border-orange-500"
                           : "border-orange-100 dark:border-[#362C27] bg-orange-50/50 dark:bg-[#1A1614] text-orange-900/60 dark:text-orange-200/50"
@@ -526,7 +550,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* TOTAL */}
+                {/* TOTAL & SUBMIT */}
                 <div className="pt-2">
                   <div className="flex justify-between text-base font-bold text-orange-900 dark:text-orange-100">
                     <span>ยอดชำระทั้งหมด</span>
@@ -536,8 +560,10 @@ export default function HomePage() {
                   </div>
 
                   <button
+                    type="button"
+                    onClick={handleCheckout}
                     disabled={cartItems.length === 0}
-                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700 dark:bg-orange-600 dark:hover:bg-orange-500 disabled:bg-orange-100 dark:disabled:bg-[#2D2421] disabled:text-orange-800/30 text-white font-bold py-3 rounded-xl transition shadow-md"
+                    className="w-full mt-4 bg-orange-600 hover:bg-orange-700 active:scale-[0.98] cursor-pointer disabled:bg-orange-100 dark:disabled:bg-[#2D2421] disabled:text-orange-800/30 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition shadow-md flex items-center justify-center"
                   >
                     ยืนยันการสั่งซื้อ
                   </button>
