@@ -23,6 +23,7 @@ import {
   Banknote,
   Flame,
   Upload,
+  CheckCircle2,
 } from "lucide-react";
 
 type ProductItem = {
@@ -133,11 +134,16 @@ export default function HomePage() {
   const [paymentMethod, setPaymentMethod] = useState("qr");
   const [cart, setCart] = useState<Record<string, number>>({});
 
+  // State สำหรับ Modal เพิ่มสินค้า
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newPrice, setNewPrice] = useState("");
   const [newCategory, setNewCategory] = useState("ลูกชิ้นปิ้ง");
   const [newImage, setNewImage] = useState<string>("");
+
+  // State สำหรับ Modal สแกน QR Code
+  const [showQrModal, setShowQrModal] = useState(false);
+  const [slipUploaded, setSlipUploaded] = useState(false);
 
   const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,11 +186,9 @@ export default function HomePage() {
     setNewCategory("ลูกชิ้นปิ้ง");
   };
 
-  // ฟังก์ชันสำหรับลบรายการสินค้าออกจากหน้าร้าน
   const handleDeleteProduct = (id: string, title: string) => {
     if (confirm(`คุณต้องการลบรายการ "${title}" ออกจากร้านใช่หรือไม่?`)) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
-      // ลบออกจากตะกร้าด้วยหากมีอยู่นะ
       setCart((prev) => {
         const next = { ...prev };
         delete next[id];
@@ -244,16 +248,27 @@ export default function HomePage() {
     });
   };
 
+  // จัดการการกดยืนยันการสั่งซื้อ
   const handleCheckout = () => {
     if (cartItems.length === 0) return;
 
-    const paymentNames: Record<string, string> = {
-      qr: "PromptPay",
-      transfer: "โอนเงิน",
-      cash: "เงินสด",
-    };
+    if (paymentMethod === "qr") {
+      setSlipUploaded(false);
+      setShowQrModal(true);
+    } else {
+      const paymentNames: Record<string, string> = {
+        transfer: "โอนผ่านบัญชีธนาคาร",
+        cash: "เงินสด (ชำระปลายทาง)",
+      };
+      alert(`สั่งซื้อเรียบร้อยแล้ว!\nชำระด้วย: ${paymentNames[paymentMethod]}\nยอดรวม: ฿${total}`);
+      setCart({});
+    }
+  };
 
-    alert(`สั่งซื้อเรียบร้อยแล้ว!\nชำระด้วย: ${paymentNames[paymentMethod]}\nยอดรวม: ฿${total}`);
+  // เมื่อผู้ใช้กดยืนยันการชำระเงินในหน้า QR Code
+  const handleConfirmQrPayment = () => {
+    alert("รับยอดชำระเรียบร้อยแล้ว! ร้านค้ากำลังเตรียมออเดอร์ให้ครับ 🍢");
+    setShowQrModal(false);
     setCart({});
   };
 
@@ -265,7 +280,7 @@ export default function HomePage() {
     <main className={`min-h-screen ${bg} transition-colors duration-300 font-sans`}>
       {/* HEADER */}
       <header
-        className={`sticky top-0 z-50 border-b ${
+        className={`sticky top-0 z-40 border-b ${
           darkMode
             ? "bg-[#1A1614]/95 border-[#2D2421]"
             : "bg-[#FAF7F2]/95 border-[#E8DFC8]"
@@ -432,7 +447,6 @@ export default function HomePage() {
                       )}
 
                       <div className="absolute top-2 right-2 flex items-center gap-1.5">
-                        {/* ปุ่มกดลบรายการสินค้า */}
                         <button
                           type="button"
                           onClick={() => handleDeleteProduct(product.id, product.title)}
@@ -669,7 +683,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* MODAL: เพิ่มสินค้าใหม่ + อัปโหลดรูป */}
+      {/* MODAL: เพิ่มสินค้าใหม่ */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div
@@ -807,6 +821,95 @@ export default function HomePage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: QR CODE SCAN PAYMENT */}
+      {showQrModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div
+            className={`w-full max-w-sm rounded-3xl p-6 shadow-2xl border text-center relative ${
+              darkMode
+                ? "bg-[#231D1A] border-[#362C27] text-white"
+                : "bg-white border-[#EFE8D8] text-[#4A3E3D]"
+            }`}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setShowQrModal(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-orange-500/10 transition text-gray-400 hover:text-gray-600 dark:hover:text-white cursor-pointer"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Header */}
+            <div className="mt-2">
+              <span className="inline-block px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 font-bold text-xs rounded-full mb-2">
+                พร้อมเพย์ (PromptPay)
+              </span>
+              <h3 className="text-xl font-extrabold text-orange-900 dark:text-orange-400">
+                สแกนเพื่อชำระเงิน
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                เปิดแอปธนาคารของคุณเพื่อสแกน QR Code
+              </p>
+            </div>
+
+            {/* Price Highlight */}
+            <div className="my-4 py-3 bg-orange-50 dark:bg-[#1A1614] rounded-2xl border border-orange-100 dark:border-[#3D332E]">
+              <span className="text-xs text-orange-800/60 dark:text-orange-200/50 block">ยอดชำระสุทธิ</span>
+              <span className="text-3xl font-black text-orange-600 dark:text-orange-400">
+                ฿{total.toLocaleString()}
+              </span>
+            </div>
+
+            {/* QR Code Container */}
+            <div className="p-4 bg-white rounded-2xl border-2 border-orange-200 inline-block shadow-inner relative group my-1">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=PROMPTPAY-PONGHUH-${total}`}
+                alt="PromptPay QR Code"
+                className="w-48 h-48 mx-auto object-contain"
+              />
+              <div className="mt-2 flex items-center justify-center gap-1 text-[11px] font-bold text-blue-900">
+                <span>Prompt</span>
+                <span className="text-sky-500">Pay</span>
+              </div>
+            </div>
+
+            {/* Account Info */}
+            <div className="mt-3 text-xs text-gray-500 dark:text-gray-400 space-y-1">
+              <p>ชื่อบัญชี: <span className="font-semibold text-gray-800 dark:text-gray-200">ร้าน ponghuh 🍢</span></p>
+              <p className="text-[11px]">หมายเลข: 08X-XXX-XXXX</p>
+            </div>
+
+            {/* Slip Upload simulation */}
+            <div className="mt-4 pt-4 border-t border-orange-100 dark:border-[#362C27]">
+              {slipUploaded ? (
+                <div className="flex items-center justify-center gap-2 text-green-600 dark:text-green-400 text-xs font-semibold py-2">
+                  <CheckCircle2 size={16} />
+                  แนบหลักฐานเรียบร้อยแล้ว
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setSlipUploaded(true)}
+                  className="w-full py-2 px-3 border border-dashed border-orange-300 dark:border-[#3D332E] rounded-xl text-xs text-orange-700 dark:text-orange-300 hover:bg-orange-50 dark:hover:bg-[#1A1614] transition flex items-center justify-center gap-2 cursor-pointer mb-2"
+                >
+                  <Upload size={14} />
+                  แนบสลิปการโอนเงิน (จำลอง)
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={handleConfirmQrPayment}
+                className="w-full mt-2 py-3 bg-orange-600 hover:bg-orange-700 active:scale-95 text-white font-bold rounded-xl text-sm transition shadow-md cursor-pointer"
+              >
+                โอนเงินเรียบร้อยแล้ว
+              </button>
+            </div>
           </div>
         </div>
       )}
