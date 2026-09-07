@@ -101,6 +101,19 @@ const INITIAL_PRODUCTS: ProductItem[] = [
     has3D: false,
     image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&q=80",
   },
+  {
+    id: "6",
+    title: "โค้กเย็นๆ (กระป๋อง)",
+    price: 18,
+    department: "แผนกเครื่องดื่ม",
+    timeAgo: "เมื่อสักครู่",
+    tag: "เครื่องดื่ม",
+    category: "เครื่องดื่ม",
+    has3D: false,
+    image: "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=500&q=80",
+    badge: "ดับกระหาย",
+    badgeColor: "bg-red-600",
+  },
 ];
 
 const CATEGORIES = [
