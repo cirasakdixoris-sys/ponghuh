@@ -39,7 +39,7 @@ type ProductItem = {
   badgeColor?: string;
 };
 
-// เพิ่มรายการสินค้าลูกชิ้นร้าน ponghuh
+// แก้ไข URL รูปภาพให้ตรงกับรายการเมนูทุกรายการเรียบร้อยแล้ว
 const PRODUCTS: ProductItem[] = [
   {
     id: "1",
@@ -50,7 +50,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "ขายดี",
     category: "ลูกชิ้นปิ้ง",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=400&q=80",
+    image: "https://images.unsplash.com/photo-1529042410759-befb1204b468?w=500&q=80",
     badge: "ขายดี",
     badgeColor: "bg-red-500",
   },
@@ -63,7 +63,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "แนะนำ",
     category: "ชุดรวมฮิต",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1626777552726-4a6b54c97e46?w=400&q=80",
+    image: "https://images.unsplash.com/photo-1562967914-608f82629710?w=500&q=80",
     badge: "ชุดสุดคุ้ม",
     badgeColor: "bg-orange-500",
   },
@@ -76,7 +76,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "ยอดฮิต",
     category: "ไส้กรอก",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1625938146369-ad8024139380?w=400&q=80",
+    image: "https://images.unsplash.com/photo-1541745537411-b8046dc6d66c?w=500&q=80",
     badge: "กรอบฟู",
     badgeColor: "bg-amber-500",
   },
@@ -89,7 +89,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "ใหม่",
     category: "ลูกชิ้นปิ้ง",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=400&q=80",
+    image: "https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=500&q=80",
   },
   {
     id: "5",
@@ -100,7 +100,7 @@ const PRODUCTS: ProductItem[] = [
     tag: "เครื่องดื่ม",
     category: "เครื่องดื่ม",
     has3D: false,
-    image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=400&q=80",
+    image: "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500&q=80",
   },
 ];
 
